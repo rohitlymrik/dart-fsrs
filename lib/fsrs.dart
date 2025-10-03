@@ -170,9 +170,6 @@ enum Rating {
 /// Represents a flashcard in the FSRS system.
 /// {@endtemplate}
 class Card {
-  /// The id of the card. Defaults to the epoch milliseconds of when the card was created.
-  final int cardId;
-
   /// The card's current learning state.
   State state;
 
@@ -193,7 +190,6 @@ class Card {
 
   /// {@macro fsrs.card}
   Card({
-    required this.cardId,
     this.state = State.learning,
     this.step,
     this.stability,
@@ -219,14 +215,10 @@ class Card {
     DateTime? due,
     DateTime? lastReview,
   }) async {
-    // epoch milliseconds of when the card was created
-    final cardId = DateTime.now().millisecondsSinceEpoch;
-
     // wait 1ms to prevent potential cardId collision on next Card creation
     await Future.delayed(const Duration(milliseconds: 1));
 
     return Card(
-      cardId: cardId,
       state: state,
       step: step,
       stability: stability,
@@ -239,7 +231,6 @@ class Card {
   @override
   String toString() {
     return 'Card('
-        'cardId: $cardId, '
         'state: $state, '
         'step: $step, '
         'stability: $stability, '
@@ -252,7 +243,6 @@ class Card {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     return other is Card &&
-        other.cardId == cardId &&
         other.state == state &&
         other.step == step &&
         other.stability == stability &&
@@ -263,8 +253,7 @@ class Card {
 
   @override
   int get hashCode {
-    return Object.hash(
-        cardId, state, step, stability, difficulty, due, lastReview);
+    return Object.hash(state, step, stability, difficulty, due, lastReview);
   }
 
   /// Returns a JSON-serializable Map representation of the Card object.
@@ -272,7 +261,6 @@ class Card {
   /// This method is specifically useful for storing Card objects in a database.
   Map<String, dynamic> toMap() {
     return {
-      'cardId': cardId,
       'state': state.value,
       'step': step,
       'stability': stability,
@@ -287,7 +275,6 @@ class Card {
   /// Creates a Card object from an existing Map.
   static Card fromMap(Map<String, dynamic> sourceMap) {
     return Card(
-      cardId: sourceMap['cardId'] as int,
       state: State.fromValue(sourceMap['state'] as int),
       step: sourceMap['step'] as int?,
       stability: sourceMap['stability'] as double?,
@@ -312,7 +299,6 @@ class Card {
     DateTime? lastReview,
   }) {
     return Card(
-      cardId: cardId ?? this.cardId,
       state: state ?? this.state,
       step: step ?? this.step,
       stability: stability ?? this.stability,
@@ -327,9 +313,6 @@ class Card {
 /// Represents the log entry of a Card object that has been reviewed.
 /// {@endtemplate}
 class ReviewLog {
-  /// The id of the card being reviewed.
-  final int cardId;
-
   /// The rating given to the card during the review.
   final Rating rating;
 
@@ -341,7 +324,6 @@ class ReviewLog {
 
   /// {@macro fsrs.review_log}
   const ReviewLog({
-    required this.cardId,
     required this.rating,
     required this.reviewDateTime,
     this.reviewDuration,
@@ -350,7 +332,6 @@ class ReviewLog {
   @override
   String toString() {
     return 'ReviewLog('
-        'cardId: $cardId, '
         'rating: $rating, '
         'reviewDateTime: $reviewDateTime, '
         'reviewDuration: $reviewDuration)';
@@ -360,7 +341,6 @@ class ReviewLog {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     return other is ReviewLog &&
-        other.cardId == cardId &&
         other.rating == rating &&
         other.reviewDateTime == reviewDateTime &&
         other.reviewDuration == reviewDuration;
@@ -368,7 +348,7 @@ class ReviewLog {
 
   @override
   int get hashCode {
-    return Object.hash(cardId, rating, reviewDateTime, reviewDuration);
+    return Object.hash(rating, reviewDateTime, reviewDuration);
   }
 
   /// Returns a JSON-serializable Map representation of the ReviewLog object.
@@ -376,7 +356,6 @@ class ReviewLog {
   /// This method is specifically useful for storing ReviewLog objects in a database.
   Map<String, dynamic> toMap() {
     return {
-      'cardId': cardId,
       'rating': rating.value,
       'reviewDateTime': reviewDateTime.toIso8601String(),
       'reviewDuration': reviewDuration,
@@ -388,7 +367,6 @@ class ReviewLog {
   /// Creates a ReviewLog object from an existing Map.
   static ReviewLog fromMap(Map<String, dynamic> sourceMap) {
     return ReviewLog(
-      cardId: sourceMap['cardId'] as int,
       rating: Rating.fromValue(sourceMap['rating'] as int),
       reviewDateTime: DateTime.parse(sourceMap['reviewDateTime'] as String),
       reviewDuration: sourceMap['reviewDuration'] as int?,
@@ -809,7 +787,6 @@ class Scheduler {
     card.lastReview = reviewDateTime;
 
     final reviewLog = ReviewLog(
-      cardId: card.cardId,
       rating: rating,
       reviewDateTime: reviewDateTime,
       reviewDuration: reviewDuration,
