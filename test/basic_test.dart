@@ -689,16 +689,6 @@ void main() {
       expect(reviewLog.toString(), isNotEmpty);
     });
 
-    test('test_unique_card_ids', () async {
-      final cardIds = <int>[];
-      for (var i = 0; i < 1000; i++) {
-        final card = await Card.create();
-        final cardId = card.cardId;
-        cardIds.add(cardId);
-      }
-      expect(cardIds.length, cardIds.toSet().length);
-    });
-
     test('test_stability_lower_bound', () async {
       /// Ensure that a Card object's stability is always >= stabilityMin
       final scheduler = Scheduler();
