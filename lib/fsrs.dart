@@ -535,12 +535,18 @@ class Scheduler {
     }
 
     currentDateTime ??= DateTime.now().toUtc();
-    final elapsedDays =
-        math.max(0, currentDateTime.difference(card.lastReview!).inDays);
 
-    return math
-        .pow(1 + _factor * elapsedDays / card.stability!, _decay)
-        .toDouble();
+    return getRetrievability(card.stability!, card.lastReview!,
+        currentDateTime: currentDateTime);
+  }
+
+  double getRetrievability(double stability, DateTime lastReview,
+      {DateTime? currentDateTime}) {
+    currentDateTime ??= DateTime.now().toUtc();
+    final elapsedDays =
+        math.max(0, currentDateTime.difference(lastReview).inDays);
+
+    return math.pow(1 + _factor * elapsedDays / stability, _decay).toDouble();
   }
 
   /// Reviews a card with a given rating at a given time for a specified duration.
